@@ -13,7 +13,7 @@ import numpy as np
 
 transform = transforms.Compose([transforms.ToTensor()])
 
-class ActressDataset(Dataset):
+class RawImageDataset(Dataset):
     def __init__(self, img_dir, transform=None):
         self.img_dir = img_dir
         self.transform = transform
@@ -48,7 +48,7 @@ class ActressDataset(Dataset):
     
 
 batch_size = 500
-train_dataset = ActressDataset('./dat/cifar', transform=transform)
+train_dataset = RawImageDataset('./dat/cifar', transform=transform)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 class CNN(nn.Module):
