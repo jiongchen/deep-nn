@@ -11,11 +11,7 @@ from PIL import Image
 import numpy as np
 
 
-transform = transforms.Compose([
-    transforms.Scale(40),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop(32),
-    transforms.ToTensor()])
+transform = transforms.Compose([transforms.ToTensor()])
 
 class ActressDataset(Dataset):
     def __init__(self, img_dir, transform=None):
@@ -51,28 +47,29 @@ class ActressDataset(Dataset):
         return len(self.train_data)
     
 
-train_dataset = ActressDataset('./temp', transform=transform)
-train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=2, shuffle=True)
+batch_size = 500
+train_dataset = ActressDataset('./dat/cifar', transform=transform)
+train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
 class CNN(nn.Module):
     def __init__(self, num_classes=10):
         super(CNN, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, stride=1),
+            nn.Conv2d(3, 16, kernel_size=3, stride=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(64, 192, kernel_size=3, stride=1),
+            nn.Conv2d(16, 64, kernel_size=3, stride=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(192*6*6, 4096),
+            nn.Linear(64*6*6, 2048),
             nn.ReLU(inplace=True),
             nn.Dropout(),
-            nn.Linear(4096, 4096),
+            nn.Linear(2048, 2048),
             nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
+            nn.Linear(2048, num_classes),
         )
 
     def forward(self, x):
@@ -104,3 +101,5 @@ for epoch in range(num_epochs):
         optimizer.step()
 
     print('Epoch [%d/%d] Loss: %.4f' %(epoch+1, num_epochs, loss.data[0]))
+
+torch.save(cnn.state_dict(), 'model.pkl')
